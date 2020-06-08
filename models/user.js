@@ -21,8 +21,13 @@ module.exports = (sequelize, DataTypes)=>(
         },
         provider: { // 추후 kakao passport고려
             type: DataTypes.STRING(20), 
-            allowNull: true,
+            allowNull: false,
+            defaultValue: 'local'
         }, 
+        snsId: { // sns사용자아이디
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
         type: { // 1=관리자, 2=전문상담사, 3=일반사용자
             type: DataTypes.INTEGER, 
             allowNull: false,

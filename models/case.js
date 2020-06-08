@@ -9,6 +9,11 @@ module.exports = (sequelize, DataTypes)=>(
             allowNull: false,
             defaultValue: false,
         },
+        status:{ // 진행상황
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            defaultValue: 1
+        },
         totalCase:{ // 총 상담회차
             type: DataTypes.INTEGER,
             allowNull: false

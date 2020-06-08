@@ -6,6 +6,10 @@ const morgan = require('morgan');
 const path = require('path');
 const session = require('express-session');
 require('dotenv').config();
+const passport = require('passport');
+const passportConfig = require('./passport');
+passportConfig(passport);
+
 
 // 세션 활성화 + 설정
 app.use(morgan('dev'));
@@ -23,11 +27,12 @@ app.use(session({
     },
 }));
 
-
+// passport middlewares
+app.use(passport.initialize());
+app.use(passport.session());
 
 // db구조 생성
 sequelize.sync();
-
 
 app.set('port', process.env.PORT || 5000); //포트 설정
 app.get('/', (req, res) => res.send('Hello World! hh'));
@@ -35,13 +40,13 @@ app.get('/', (req, res) => res.send('Hello World! hh'));
 // 라우터 선언
 const authRouter = require('./routes/auth');
 const counselorRouter = require('./routes/counselors');
+const myPageRouter = require('./routes/mypage');
 // bodyParser 사용설정
-
-
 
 // Routers
 app.use('/auth', authRouter);
 app.use('/counselors', counselorRouter);
+app.use('/mypage', myPageRouter);
 
 // http 에러 
 // 404
@@ -53,8 +58,7 @@ app.use((err, req, res, next)=>{
 app.use((err, req, res, next)=>{
     console.log(`Server ERROR:${err}`);
     res.status(500).send(`Server ERROR`);
-
-})
+});
 
 
 

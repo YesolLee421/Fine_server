@@ -8,11 +8,11 @@ module.exports = (sequelize, DataTypes)=>(
         }, 
         name_formal: { // 실명
             type: DataTypes.STRING(50),
-            allowNull: false,
+            allowNull: true,
         },
         gender: { // 상담사 성별
             type: DataTypes.INTEGER,
-            allowNull: false,
+            allowNull: true,
             defaultValue: 1 //1=여성, 2=남성, 3=기타
         },
         description:{ // 간단 한줄 소개

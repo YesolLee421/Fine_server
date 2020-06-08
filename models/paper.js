@@ -41,7 +41,6 @@ module.exports = (sequelize, DataTypes)=>(
             type: DataTypes.INTEGER,
             allowNull: true,
         },
-
         isMarried: { 
             type: DataTypes.BOOLEAN,
             allowNull: true,
