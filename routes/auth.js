@@ -12,7 +12,7 @@ const bcrypt = require('bcrypt');
 // 미들웨어
 const { isLoggedIn, isNotLoggedIn } = require('./middlewares');
 
-// get user list
+// 테스트용 get user list
 router.get('/', async (req, res, next)=>{
     try{
         const users = await User.findAll();
@@ -34,9 +34,19 @@ router.get('/', async (req, res, next)=>{
     }
 });
 
+
+
 // register
 router.post('/register', async (req, res, next)=>{
     const { email, nickname, password, type} = req.body;
+    if(!email && !nickname && !password && !type) {
+        let result = {
+            success: false,
+            data: '',
+            message: '이메일, 비밀번호, 닉네임, 사용자 유형을 반드시 입력하십시오.'
+        }
+        return res.status(200).send(result);    
+    }
     try {
         const exUser = await User.findOne({where:{email}});
         if(exUser){
@@ -99,12 +109,25 @@ router.post('/login', (req, res, next)=>{
     console.log('login 라우터 시작');
     const { email, password} = req.body;
     console.log(`email=${email}, password=${password}`);
+    if(!email && !password) {
+        let result = {
+            success: false,
+            data: '',
+            message: '이메일, 비밀번호를 반드시 입력하십시오.'
+        }
+        return res.status(200).send(result);    
+    }
 
     passport.authenticate('local', (authError, user, info)=>{
         console.log('login 라우터 passport.authenticate 시작');
         //1. 에러 발생
         if(authError){
             console.error(authError);
+            let result = {
+                success: false,
+                data: '',
+                message: info.message
+            }
             return next(authError);
         }
         // 2. 실패 (유저 없음)

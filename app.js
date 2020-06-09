@@ -52,12 +52,22 @@ app.use('/mypage', myPageRouter);
 // 404
 app.use((err, req, res, next)=>{
     console.log(`Clinet ERROR:${err}`);
-    res.status(400).send(`404 Not Found: ${err}`);
+    let result = {
+        success: false,
+        data: '',
+        message: `Clinet ERROR:${err}`
+    }
+    return res.status(400).send(result);
 });
 // 서버에러 500번대
 app.use((err, req, res, next)=>{
     console.log(`Server ERROR:${err}`);
-    res.status(500).send(`Server ERROR`);
+    let result = {
+        success: false,
+        data: '',
+        message: `Server ERROR: ${err}`
+    }
+    return res.status(500).send(`Server ERROR`);
 });
 
 
