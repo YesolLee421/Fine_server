@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const { User, Counselor } = require('../models');
+const { User, Counselor, Paper } = require('../models');
 const bcrypt = require('bcrypt');
-const { upload, fileDelete } = require('./middlewares');
+const { upload, fileDelete, isLoggedIn, isNotLoggedIn } = require('./middlewares');
 let result = {
     success: true,
     data: '',
@@ -16,19 +16,27 @@ router.get('/', async(req, res, next)=>{
         nickname: req.user.nickname,
         type: req.user.type
     }
-    let data = {
-        user: user
-    }
+
     try {
+        const paper = await Paper.findOne({
+            where: { fk_user_uid: req.user.user_uid}
+        });
+        let data = {
+            user: user,
+            paper: paper
+        }
         if(req.user.type==2){ // 전문 상담사인 경우
             const counselor = await Counselor.findOne({
                 where: { user_uid: req.user.user_uid}
             });
+            
             data.counselor = counselor;
+            
         }
         result.success= true;
         result.data= data;
         result.message = '로그인 한 유저의 정보를 불러왔습니다.';
+        console.log(result.data)
         
         return res.status(200).send(result); 
     } catch (error) {

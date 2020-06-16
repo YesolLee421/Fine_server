@@ -5,13 +5,15 @@ const { Counselor } = require('../models');
 // 추후 필터, 정렬 조건을 라우터밖에 저장해서 동시에 적용 가능하도록?
 // 필터 초기화 따로 필요
 
-// 모든 (검증된) 상담사 불러오기
-router.get('/', async (req, res, next)=>{
+// 모든 (검증된) 상담사 불러오기: 추후 인피니티 스크롤
+router.get('/:sort/:filter', async (req, res, next)=>{
+    const { sort, filter } = req.params;
     try {
         // req에 필터 조건도 받아야 함 {"gender":1, "count":100}..
         const counselors = await Counselor.findAll({
             where:{ isVerified: true }
             });
+        //const counselors = await Counselor.findAll();    
         console.log("All counselors:", JSON.stringify(counselors, null, 2));
         let result = {
             success: true,
@@ -21,6 +23,7 @@ router.get('/', async (req, res, next)=>{
         if(counselors[0]==null){
             result.message = '상담사가 하나도 없습니다.'
         }
+        result.message = '상담사 전체 목록 조회 완료'
         result.data = counselors;
         return res.status(200).json(result);
         

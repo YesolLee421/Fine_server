@@ -18,7 +18,7 @@ module.exports = (sequelize, DataTypes)=>(
             type: DataTypes.INTEGER,
             allowNull: false
         },
-        userCase:{ // 현재까지 완료한 회차
+        usedCase:{ // 현재까지 완료한 회차
             type:DataTypes.INTEGER,
             allowNull: false, 
             defaultValue: 0
@@ -30,7 +30,7 @@ module.exports = (sequelize, DataTypes)=>(
         },
         totalPrice:{
             type:DataTypes.INTEGER,
-            allowNull: false,
+            allowNull: false
         },
         nextCase:{
             type: DataTypes.DATE,

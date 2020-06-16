@@ -12,7 +12,6 @@ module.exports = (sequelize, DataTypes)=>(
             type: DataTypes.INTEGER,
             allowNull: true,
         },
-
         counselBefore: {
             type: DataTypes.INTEGER,
             allowNull: true,
@@ -56,6 +55,11 @@ module.exports = (sequelize, DataTypes)=>(
         request: {
             type: DataTypes.TEXT,
             allowNull: true
+        },
+        isCompleted: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+            defaultValue: false
         }     
     }, {
         timestamps: true, //생성일, 수정일 기록

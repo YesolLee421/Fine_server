@@ -70,13 +70,17 @@ router.post('/register', async (req, res, next)=>{
                 type
             });
             // 개인별 상담접수지 생성
-            await Paper.create();
+            await Paper.create({
+                fk_user_uid: user_uid
+            });
 
             // 회원가입 유저정보 반환
             let registeredUser = {
+                user_uid: user_uid,
                 nickname: nickname,
                 email: email,
-                type:''
+                type:'', 
+                hasPaper: false
             }
 
             if(type==2){ // 전문 상담가 가입
@@ -147,9 +151,11 @@ router.post('/login', (req, res, next)=>{
                 }
                 // 로그인한 유저 정보 반환
                 let loggedInUser = {
+                    user_uid: user.user_uid,
                     nickname: user.nickname,
                     email: user.email,
-                    type: user.type
+                    type: user.type, 
+                    hasPaper: user.hasPaper
                 }
                 let result = {
                     success: true,
