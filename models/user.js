@@ -31,6 +31,11 @@ module.exports = (sequelize, DataTypes)=>(
         type: { // 1=관리자, 2=전문상담사, 3=일반사용자
             type: DataTypes.INTEGER, 
             allowNull: false,
+        },
+        hasPaper: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+            defaultValue: false
         }
     }, {
         timestamps: true, //생성일, 수정일 기록

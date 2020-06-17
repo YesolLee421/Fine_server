@@ -5,13 +5,17 @@ const bcrypt = require('bcrypt');
 const { upload, fileDelete, isLoggedIn, isNotLoggedIn } = require('./middlewares');
 let result = {
     success: true,
-    data: '',
+    data: {
+        user : null,
+        counselor : null
+    },
     message: ''
 }
 // 내 정보 보기
 router.get('/', async(req, res, next)=>{
     // 유저 기본정보
     let user = {
+        user_uid: req.user.user_uid,
         email: req.user.email,
         nickname: req.user.nickname,
         type: req.user.type
@@ -21,20 +25,15 @@ router.get('/', async(req, res, next)=>{
         const paper = await Paper.findOne({
             where: { fk_user_uid: req.user.user_uid}
         });
-        let data = {
-            user: user,
-            paper: paper
-        }
         if(req.user.type==2){ // 전문 상담사인 경우
             const counselor = await Counselor.findOne({
                 where: { user_uid: req.user.user_uid}
             });
-            
-            data.counselor = counselor;
-            
+            result.data.counselor = counselor;
         }
         result.success= true;
-        result.data= data;
+        result.data.user = user;
+        
         result.message = '로그인 한 유저의 정보를 불러왔습니다.';
         console.log(result.data)
         
@@ -65,12 +64,13 @@ router.patch('/nickname', async(req, res, next)=>{
             where: {user_uid}
         });
         // 변경된 유저정보 보여주기 위해 조회
-        result.data = await User.findOne({
-            attributes: ['email','nickname'], // 이메일, 닉네임, 프로필사진 주소, 소개글
+        result.data.user = await User.findOne({
+            
                 where: {
                     user_uid: user_uid
                 }
         });
+        result.data.counselor = null;
         result.message = "닉네임 변경 완료";
         result.success = true;
         return res.status(200).json(result);
@@ -89,14 +89,14 @@ router.patch('/password', async(req, res, next)=>{
         const comparePw = await bcrypt.compare(pre_password, req.user.password);
         if(!comparePw){
             result.success = false;
-            result.data = '';
+            result.data = null;
             result.message = "현재 비밀번호가 일치하지 않습니다.";
             return res.status(200).json(result);
         }
         // 2. 새로운 비밀번호 == 비밀번호 확인 맞는지 검사
         if(new_password!=''&& new_password_2!='' && new_password!=new_password_2){
             result.success = false;
-            result.data = '';
+            result.data = null;
             result.message = "새로운 비밀번호 입력을 다시 확인하십시오.";
             return res.status(200).json(result);
         }
@@ -107,7 +107,7 @@ router.patch('/password', async(req, res, next)=>{
         }, {
             where: {user_uid}
         });
-        result.data = '';
+        result.data = null;
         result.message = "비밀번호 변경 완료";
         result.success = true;
         return res.status(200).json(result);
@@ -121,16 +121,24 @@ router.patch('/password', async(req, res, next)=>{
 router.patch('/counselor/profile', upload.single('file'), async(req, res, next)=>{
     const user_uid = req.user.user_uid;
     const { name_formal, description} = req.body;
+    // 유저 기본정보
+    let user = {
+        user_uid: req.user.user_uid,
+        email: req.user.email,
+        nickname: req.user.nickname,
+        type: req.user.type
+    }
+    result.data.user = user;
 
     try {
         // 상담사 정보 검색: 이미 사진 있는지 보기
         const counselor = await Counselor.findOne({
-            attributes: ['user_uid','name_formal','picture','description'],
-        }, {
-            where: {user_uid}
+                where:  {user_uid: req.user.user_uid }
         });
         // 실명은 최초 1회만 변경
-        if(!counselor.name_formal) counselor.name_formal = name_formal;
+        if(counselor.name_formal==null) {
+            counselor.name_formal = name_formal;
+        }
         // 한 줄 소개
         counselor.description = description;
         // 프로필 사진 수정
@@ -145,8 +153,8 @@ router.patch('/counselor/profile', upload.single('file'), async(req, res, next)=
 
         // 변경사항 저장
         await counselor.save();
-
-        result.data = counselor;
+        
+        result.data.counselor = counselor;
         result.message = "상담사 프로필 변경 완료";
         result.success = true;
         return res.status(200).json(result);        
@@ -160,6 +168,14 @@ router.patch('/counselor/profile', upload.single('file'), async(req, res, next)=
 router.patch('/counselor/intro', async(req, res, next)=>{
     const user_uid = req.user.user_uid;
     const {intro_1, intro_2, intro_3} = req.body;
+    // 유저 기본정보
+    let user = {
+        user_uid: req.user.user_uid,
+        email: req.user.email,
+        nickname: req.user.nickname,
+        type: req.user.type
+    }
+    result.data.user = user;
 
     try {
         // 상담사 업데이트
@@ -171,10 +187,11 @@ router.patch('/counselor/intro', async(req, res, next)=>{
             where: {user_uid}
         });
         // 변경된 유저정보 보여주기 위해 조회
-        result.data = await Counselor.findOne({
-                where: {
-                    user_uid: user_uid
-                }
+        result.data.counselor = await Counselor.findOne({
+            
+            where: {
+                user_uid: user_uid
+            }
         });
         result.message = "상담사 소개 변경 완료";
         result.success = true;
@@ -190,6 +207,14 @@ router.patch('/counselor/intro', async(req, res, next)=>{
 router.patch('/counselor/experience', async(req, res, next)=>{
     const user_uid = req.user.user_uid;
     const {certificate, career, education} = req.body;
+    // 유저 기본정보
+    let user = {
+        user_uid: req.user.user_uid,
+        email: req.user.email,
+        nickname: req.user.nickname,
+        type: req.user.type
+    }
+    result.data.user = user;
     try {
         // 상담사 업데이트
         await Counselor.update({
@@ -200,7 +225,8 @@ router.patch('/counselor/experience', async(req, res, next)=>{
             where: {user_uid}
         });
         // 변경된 유저정보 보여주기 위해 조회
-        result.data = await Counselor.findOne({
+        result.data.counselor = await Counselor.findOne({
+            
                 where: {
                     user_uid: user_uid
                 }
@@ -223,6 +249,14 @@ router.patch('/counselor/time_prefered', async(req, res, next)=>{
         time: time
     } // -> json stringfy
     const stringify = JSON.stringify(time_prefered);
+    // 유저 기본정보
+    let user = {
+        user_uid: req.user.user_uid,
+        email: req.user.email,
+        nickname: req.user.nickname,
+        type: req.user.type
+    }
+    result.data.user = user;
     try {
         // 상담사 업데이트
         await Counselor.update({
@@ -231,7 +265,8 @@ router.patch('/counselor/time_prefered', async(req, res, next)=>{
             where: {user_uid}
         });
         // 변경된 유저정보 보여주기 위해 조회
-        result.data = await Counselor.findOne({
+        result.data.counselor = await Counselor.findOne({
+            
                 where: {
                     user_uid: user_uid
                 }
@@ -249,6 +284,14 @@ router.patch('/counselor/time_prefered', async(req, res, next)=>{
 router.patch('/counselor/price', async(req, res, next)=>{
     const user_uid = req.user.user_uid;
     const {price, discount_4w, discount_10w} = req.body;
+    // 유저 기본정보
+    let user = {
+        user_uid: req.user.user_uid,
+        email: req.user.email,
+        nickname: req.user.nickname,
+        type: req.user.type
+    }
+    result.data.user = user;
     try {
         // 상담사 업데이트
         await Counselor.update({
@@ -259,7 +302,8 @@ router.patch('/counselor/price', async(req, res, next)=>{
             where: {user_uid}
         });
         // 변경된 유저정보 보여주기 위해 조회
-        result.data = await Counselor.findOne({
+        result.data.counselor = await Counselor.findOne({
+            
                 where: {
                     user_uid: user_uid
                 }
@@ -277,6 +321,14 @@ router.patch('/counselor/price', async(req, res, next)=>{
 router.patch('/counselor/bank_account', async(req, res, next)=>{
     const user_uid = req.user.user_uid;
     const {bank_name, account_number} = req.body;
+    // 유저 기본정보
+    let user = {
+        user_uid: req.user.user_uid,
+        email: req.user.email,
+        nickname: req.user.nickname,
+        type: req.user.type
+    }
+    result.data.user = user;
     let bank_account = {
         bank_name,
         account_number
@@ -290,7 +342,8 @@ router.patch('/counselor/bank_account', async(req, res, next)=>{
             where: {user_uid}
         });
         // 변경된 유저정보 보여주기 위해 조회
-        result.data = await Counselor.findOne({
+        result.data.counselor = await Counselor.findOne({
+            
                 where: {
                     user_uid: user_uid
                 }
@@ -303,15 +356,6 @@ router.patch('/counselor/bank_account', async(req, res, next)=>{
         return next(error);        
     }
 });
-
-
-
-
-
-
-
-
-
 
 
 module.exports = router;
