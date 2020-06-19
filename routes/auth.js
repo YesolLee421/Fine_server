@@ -84,8 +84,13 @@ router.post('/register', async (req, res, next)=>{
             }
 
             if(type==2){ // 전문 상담가 가입
+                let time_prefered = {
+                    day:[],
+                    time:[]
+                }
                 await Counselor.create({
-                    user_uid
+                    user_uid,
+                    time_prefered: JSON.stringify(time_prefered)
                 });
                 registeredUser.type = '전문상담사';
             } else if( type==1){

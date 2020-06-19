@@ -20,7 +20,7 @@ module.exports = (sequelize, DataTypes)=>(
             allowNull: true
         },
         picture: { //프로필 사진 경로
-            type: DataTypes.STRING(50),
+            type: DataTypes.STRING,
             allowNull: true
         },
         isVerified:{ // 전문 상담사 인증
@@ -73,7 +73,7 @@ module.exports = (sequelize, DataTypes)=>(
             defaultValue: 0
         },
         bank_account:{ //은행계좌 (json)
-            type: DataTypes.STRING(50),
+            type: DataTypes.STRING,
             allowNull: true
         },
         count:{ // 총 상담횟수

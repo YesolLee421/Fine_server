@@ -119,8 +119,7 @@ router.patch('/password', async(req, res, next)=>{
 
 // 프로필 변경 (사진, 한 줄 소개)
 router.patch('/counselor/profile', upload.single('file'), async(req, res, next)=>{
-    const user_uid = req.user.user_uid;
-    const { name_formal, description} = req.body;
+    const { name_formal, description, gender} = req.body;
     // 유저 기본정보
     let user = {
         user_uid: req.user.user_uid,
@@ -129,16 +128,22 @@ router.patch('/counselor/profile', upload.single('file'), async(req, res, next)=
         type: req.user.type
     }
     result.data.user = user;
+    console.log(`description=${description} | name_formal = ${name_formal}`);
 
     try {
         // 상담사 정보 검색: 이미 사진 있는지 보기
         const counselor = await Counselor.findOne({
                 where:  {user_uid: req.user.user_uid }
         });
+        result.data.counselor = counselor;
+
         // 실명은 최초 1회만 변경
         if(counselor.name_formal==null) {
             counselor.name_formal = name_formal;
         }
+        // 성별
+        counselor.gender = gender;
+        
         // 한 줄 소개
         counselor.description = description;
         // 프로필 사진 수정
@@ -152,9 +157,9 @@ router.patch('/counselor/profile', upload.single('file'), async(req, res, next)=
         }
 
         // 변경사항 저장
-        await counselor.save();
+        //await counselor.save();
         
-        result.data.counselor = counselor;
+        //result.data.counselor = counselor;
         result.message = "상담사 프로필 변경 완료";
         result.success = true;
         return res.status(200).json(result);        
@@ -244,11 +249,16 @@ router.patch('/counselor/experience', async(req, res, next)=>{
 router.patch('/counselor/time_prefered', async(req, res, next)=>{
     const user_uid = req.user.user_uid;
     const {day, time} = req.body;
+    console.log(`day = ${JSON.stringify(day.values)} / time = ${JSON.stringify(time.values)}`);
+
     let time_prefered = {
-        day: day,
-        time: time
-    } // -> json stringfy
+        day: day.values,
+        time: time.values
+    }
+     // -> json stringfy
     const stringify = JSON.stringify(time_prefered);
+    console.log(`time_prefered = ${time_prefered}`);
+    console.log(`stringify = ${stringify}`);
     // 유저 기본정보
     let user = {
         user_uid: req.user.user_uid,
