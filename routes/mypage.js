@@ -135,12 +135,12 @@ router.patch('/counselor/profile', upload.single('file'), async(req, res, next)=
         const counselor = await Counselor.findOne({
                 where:  {user_uid: req.user.user_uid }
         });
-        result.data.counselor = counselor;
-
+    
         // 실명은 최초 1회만 변경
         if(counselor.name_formal==null) {
             counselor.name_formal = name_formal;
         }
+        //counselor.name_formal = name_formal;
         // 성별
         counselor.gender = gender;
         
@@ -157,9 +157,9 @@ router.patch('/counselor/profile', upload.single('file'), async(req, res, next)=
         }
 
         // 변경사항 저장
-        //await counselor.save();
+        await counselor.save();
         
-        //result.data.counselor = counselor;
+        result.data.counselor = counselor;
         result.message = "상담사 프로필 변경 완료";
         result.success = true;
         return res.status(200).json(result);        

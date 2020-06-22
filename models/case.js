@@ -1,13 +1,17 @@
 module.exports = (sequelize, DataTypes)=>(
     sequelize.define('case',  {
         counselor_id:{
-            type: DataTypes.INTEGER,
+            type: DataTypes.STRING,
             allowNull: false,
         },
-        hasPaper:{ // 상담 접수지 제출여부
-            type: DataTypes.BOOLEAN,
-            allowNull: false,
-            defaultValue: false,
+        // hasPaper:{ // 상담 접수지 제출여부
+        //     type: DataTypes.BOOLEAN,
+        //     allowNull: false,
+        //     defaultValue: false,
+        // },
+        paper_id:{ // 상담 접수지 제출 시 id 저장
+            type: DataTypes.INTEGER,
+            allowNull: true
         },
         status:{ // 진행상황
             type: DataTypes.INTEGER,
@@ -23,11 +27,11 @@ module.exports = (sequelize, DataTypes)=>(
             allowNull: false, 
             defaultValue: 0
         },
-        discountRate:{
-            type:DataTypes.INTEGER,
-            allowNull: false,
-            defaultValue :0
-        },
+        // discountRate:{
+        //     type:DataTypes.INTEGER,
+        //     allowNull: false,
+        //     defaultValue :0
+        // },
         totalPrice:{
             type:DataTypes.INTEGER,
             allowNull: false

@@ -41,12 +41,16 @@ app.get('/', (req, res) => res.send('Hello World! hh'));
 const authRouter = require('./routes/auth');
 const counselorRouter = require('./routes/counselors');
 const myPageRouter = require('./routes/mypage');
+const caseRouter = require('./routes/cases');
+const paperRouter = require('./routes/paper');
 // bodyParser 사용설정
 
 // Routers
 app.use('/auth', authRouter);
 app.use('/counselors', counselorRouter);
 app.use('/mypage', myPageRouter);
+app.use('/cases', caseRouter);
+app.use('/paper', paperRouter);
 
 // http 에러 
 // 404
