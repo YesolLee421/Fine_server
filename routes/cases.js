@@ -3,8 +3,22 @@ const express = require("express");
 const router = express.Router();
 // 모델
 const { Case, Counselor, User, Paper } = require("../models");
+const Sequelize = require('sequelize');
 // 미들웨어
 const { isLoggedIn, isNotLoggedIn } = require('./middlewares');
+const env = process.env.NODE_ENV || 'development';
+const config = require('../config/config.json')[env];
+let sequelize;
+if (config.use_env_variable) {
+    sequelize = new Sequelize(process.env[config.use_env_variable], config);
+} else {
+    sequelize = new Sequelize(
+        config.database,
+        config.username,
+        config.password,
+        config
+    );
+}
 
 // response 형식
 let result = {
@@ -20,31 +34,43 @@ router.get('/', isLoggedIn, async (req, res, next)=>{
     const type = req.user.type;
 
     try {
-        let cases;
-        if(type==2){ // 전문 상담가
-             cases = await Case.findAll({
-                where:{counselor_id: req.user.user_uid},
-                order:[['status', 'ASC']]
-             });
-        } else if(type==3){ // 일반인
-            cases = await Case.findAll({
-                where: {
-                    fk_user_uid: req.user.user_uid
-                },
-                order:[['status', 'ASC']]
-            });
-        } else {
-            cases = await Case.findAll();
+        let query;
+        if(type==3) { // 일반인
+            query = 
+            'SELECT cases.*, counselors.name_formal AS counselor_name, counselors.picture AS counselor_picture ' +
+            'From cases ' + 
+            'LEFT JOIN counselors ON counselors.user_uid=cases.counselor_id ' + 
+            'WHERE cases.fk_user_uid=:user_uid ' + 
+            'ORDER BY cases.status ASC';
+        } else if(type==2) { // 상담사
+            query = 
+            'SELECT cases.*, counselors.name_formal AS counselor_name, counselors.picture AS counselor_picture ' +
+            'From cases ' + 
+            'LEFT JOIN counselors ON counselors.user_uid=cases.counselor_id ' + 
+            'WHERE cases.counselor_id=:user_uid ' + 
+            'ORDER BY cases.status ASC';
+        } else { // 관리자
+            query = 
+            'SELECT cases.*, counselors.name_formal AS counselor_name, counselors.picture AS counselor_picture ' +
+            'From cases ' + 
+            'LEFT JOIN counselors ON counselors.user_uid=cases.counselor_id ';
         }
+    
+        await sequelize.query(query, {
+            replacements: { user_uid: req.user.user_uid },
+            type: Sequelize.QueryTypes.SELECT,
+            raw: true
+        }).then(cases =>{
+            result.message = '전체 상담 조회 완료'
+            if(cases[0]==null){
+                result.message = '상담 내역이 하나도 없습니다.'               
+            }
+            result.success = true;
+            result.data = cases;
 
-        if(cases[0]==null){
-            result.message = '상담 내역이 하나도 없습니다.'
-        } else {
-            result.message = '상담 전체 목록 조회 완료'
-        }
-        result.success = true;
-        result.data = cases;
-        return res.status(200).json(result);
+        });
+
+        return res.status(200).json(result);   
         
     } catch (error) {
         console.error(error);
@@ -55,21 +81,42 @@ router.get('/', isLoggedIn, async (req, res, next)=>{
 
 // 개별 상담 케이스 보기
 router.get('/:case_id', async(req, res, next)=>{
-    const case_id = req.params.case_id;
+    const case_id = parseInt(req.params.case_id);
+
     try {
-        // couselor name_formal 정보 & paper도 받아오기
-        const caseFound = await Case.findOne({
-            where:{ id: case_id }
-        });
-        if(caseFound){
-            result.success = true;
+        let query = 
+        'SELECT cases.*, counselors.name_formal AS counselor_name, counselors.picture AS counselor_picture ' +
+        'From cases ' + 
+        'LEFT JOIN counselors ON counselors.user_uid=cases.counselor_id ' + 
+        'WHERE cases.id=:case_id ';
+
+        await sequelize.query(query, {
+            replacements: { case_id: case_id },
+            type: Sequelize.QueryTypes.SELECT,
+            raw: true
+        }).then(cases =>{
             result.message = '개별 상담 조회 완료'
-            result.data = caseFound;
-        } else {
-            result.success = false;
-            result.message = '개별 상담 조회 실패'
-            result.data = null;
-        }
+            if(cases[0]==null){
+                result.message = '상담 내역이 하나도 없습니다.'               
+            }
+            result.success = true;
+            result.data = cases;
+
+        });
+
+        // couselor name_formal 정보 & paper도 받아오기
+        // const caseFound = await Case.findOne({
+        //     where:{ id: case_id }
+        // });
+        // if(caseFound){
+        //     result.success = true;
+        //     result.message = '개별 상담 조회 완료'
+        //     result.data = caseFound;
+        // } else {
+        //     result.success = false;
+        //     result.message = '개별 상담 조회 실패'
+        //     result.data = null;
+        // }
         return res.status(200).json(result);        
         
     } catch (error) {
