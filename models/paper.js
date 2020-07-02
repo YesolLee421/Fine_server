@@ -8,35 +8,35 @@ module.exports = (sequelize, DataTypes)=>(
             type: DataTypes.INTEGER,
             allowNull: true,
         },
-        job: {
+        job: { //String
             type: DataTypes.INTEGER,
             allowNull: true,
         },
-        counselBefore: {
+        counselBefore: { //String
             type: DataTypes.INTEGER,
             allowNull: true,
         },
-        clinicBefore: {
+        clinicBefore: { // String
             type: DataTypes.INTEGER,
             allowNull: true,
         }, 
-        problem: { // array
+        problem: { // String
             type: DataTypes.TEXT,
             allowNull: true,
         },
-        symptom: { // array
+        symptom: { // String
             type: DataTypes.TEXT,
             allowNull: true,
         },  
-        religion: { 
+        religion: { //String
             type: DataTypes.INTEGER,
             allowNull: true,
         },
-        education: { 
+        education: { //String
             type: DataTypes.INTEGER,
             allowNull: true,
         },
-        livingCondition: { 
+        livingCondition: { //String
             type: DataTypes.INTEGER,
             allowNull: true,
         },
@@ -48,7 +48,7 @@ module.exports = (sequelize, DataTypes)=>(
             type: DataTypes.BOOLEAN,
             allowNull: true,
         },
-        family: { // array
+        family: { // String
             type: DataTypes.TEXT,
             allowNull: true,
         },

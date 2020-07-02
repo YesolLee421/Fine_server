@@ -88,7 +88,8 @@ router.get('/:case_id', async(req, res, next)=>{
         'SELECT cases.*, counselors.name_formal AS counselor_name, counselors.picture AS counselor_picture ' +
         'From cases ' + 
         'LEFT JOIN counselors ON counselors.user_uid=cases.counselor_id ' + 
-        'WHERE cases.id=:case_id ';
+        'WHERE cases.id=:case_id ' + 
+        'LIMIT 1';
 
         await sequelize.query(query, {
             replacements: { case_id: case_id },
@@ -99,24 +100,10 @@ router.get('/:case_id', async(req, res, next)=>{
             if(cases[0]==null){
                 result.message = '상담 내역이 하나도 없습니다.'               
             }
+            result.data = cases[0];
             result.success = true;
-            result.data = cases;
-
+            
         });
-
-        // couselor name_formal 정보 & paper도 받아오기
-        // const caseFound = await Case.findOne({
-        //     where:{ id: case_id }
-        // });
-        // if(caseFound){
-        //     result.success = true;
-        //     result.message = '개별 상담 조회 완료'
-        //     result.data = caseFound;
-        // } else {
-        //     result.success = false;
-        //     result.message = '개별 상담 조회 실패'
-        //     result.data = null;
-        // }
         return res.status(200).json(result);        
         
     } catch (error) {
@@ -139,7 +126,7 @@ router.post('/', isLoggedIn,  async(req, res, next)=>{
     const user_uid = req.user.user_uid;
     const {counselor_id, totalCase, price, discountRate } = req.body;
     let totalCase_int = parseInt(totalCase)
-    if(user_uid==counselor_id) {
+    if(user_uid===counselor_id) {
         result.success = false;
         result.data = null;
         result.message = "본인에게 상담을 신청할 수 없습니다."
@@ -148,8 +135,7 @@ router.post('/', isLoggedIn,  async(req, res, next)=>{
     let totalPrice = (price*totalCase_int)/100*(100-discountRate);
     console.log(`totalPrice = ${totalPrice}`);
     let date = new Date();
-    console.log(`dateNow = ${date.toString()}`);
-    //console.log(`expireDate = ${add_weeks(date, 2).toString()}`); 
+    console.log(`dateNow = ${date.toString()}`); 
 
     try {
         const newCase = await Case.create({
@@ -176,7 +162,7 @@ router.post('/', isLoggedIn,  async(req, res, next)=>{
 
 
 // 다음 상담 날짜 입력 (상담사)
-router.patch('/nextCase', async(req, res, next)=>{
+router.patch('/nextCase/:case_id', async(req, res, next)=>{
     try {
         
     } catch (error) {

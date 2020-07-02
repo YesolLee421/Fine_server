@@ -11,7 +11,8 @@ module.exports = (sequelize, DataTypes)=>(
         // },
         paper_id:{ // 상담 접수지 제출 시 id 저장
             type: DataTypes.INTEGER,
-            allowNull: true
+            allowNull: false,
+            defaultValue: -1
         },
         status:{ // 진행상황
             type: DataTypes.INTEGER,
