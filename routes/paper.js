@@ -51,8 +51,41 @@ router.get('/:paper_id', isLoggedIn, async(req, res, next)=>{
 });
 
 // 상담접수지 전체 저장 (user-hasPaper도 바꿔주기)
-router.put('/', isLoggedIn, async(req, res, next)=>{
+router.put('/:', isLoggedIn, async(req, res, next)=>{
+
+    const user_uid = req.user.user_uid;
+    const {
+        gender, birth_year, job, counselBefore, clinicBefore, 
+        problem, symptom, religion, education, livingCondition, 
+        isMarried, hasMate, family, request
+    } = req.body;
     try {
+        // paper 변경
+        await Paper.update({
+            gender, 
+            birth_year, 
+            job, 
+            counselBefore, 
+            clinicBefore, 
+            problem, 
+            symptom, 
+            religion, 
+            education, 
+            livingCondition, 
+            isMarried, 
+            hasMate, 
+            family, 
+            request
+        }, {
+            where: { fk_user_uid: user_uid }
+        });
+        // 변경된 정보 조회
+        result.data = await Paper.findOne({
+            where: {fk_user_uid: user_uid}
+        });
+        result.message = "상담접수지 전체수정 완료";
+        result.success = true;
+        return res.status(200).json(result);
         
     } catch (error) {
         console.error(error);

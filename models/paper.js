@@ -8,44 +8,44 @@ module.exports = (sequelize, DataTypes)=>(
             type: DataTypes.INTEGER,
             allowNull: true,
         },
-        job: { //String
+        job: { 
             type: DataTypes.INTEGER,
             allowNull: true,
         },
-        counselBefore: { //String
+        counselBefore: { 
             type: DataTypes.INTEGER,
             allowNull: true,
         },
-        clinicBefore: { // String
+        clinicBefore: { 
             type: DataTypes.INTEGER,
             allowNull: true,
         }, 
-        problem: { // String
+        problem: { 
             type: DataTypes.TEXT,
             allowNull: true,
         },
-        symptom: { // String
+        symptom: { 
             type: DataTypes.TEXT,
             allowNull: true,
         },  
-        religion: { //String
+        religion: { 
             type: DataTypes.INTEGER,
             allowNull: true,
         },
-        education: { //String
+        education: { 
             type: DataTypes.INTEGER,
             allowNull: true,
         },
-        livingCondition: { //String
+        livingCondition: { 
             type: DataTypes.INTEGER,
             allowNull: true,
         },
         isMarried: { 
-            type: DataTypes.BOOLEAN,
+            type: DataTypes.INTEGER,
             allowNull: true,
         },
         hasMate: { 
-            type: DataTypes.BOOLEAN,
+            type: DataTypes.INTEGER,
             allowNull: true,
         },
         family: { // String
