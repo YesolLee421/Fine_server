@@ -3,6 +3,7 @@ module.exports = (sequelize, DataTypes)=>(
         gender: {
             type: DataTypes.INTEGER,
             allowNull: true,
+            defaultValue: -1
         },
         birth_year: {
             type: DataTypes.INTEGER,
@@ -11,14 +12,17 @@ module.exports = (sequelize, DataTypes)=>(
         job: { 
             type: DataTypes.INTEGER,
             allowNull: true,
+            defaultValue: -1
         },
         counselBefore: { 
             type: DataTypes.INTEGER,
             allowNull: true,
+            defaultValue: -1
         },
         clinicBefore: { 
             type: DataTypes.INTEGER,
             allowNull: true,
+            defaultValue: -1
         }, 
         problem: { 
             type: DataTypes.TEXT,
@@ -31,26 +35,32 @@ module.exports = (sequelize, DataTypes)=>(
         religion: { 
             type: DataTypes.INTEGER,
             allowNull: true,
+            defaultValue: -1
         },
         education: { 
             type: DataTypes.INTEGER,
             allowNull: true,
+            defaultValue: -1
         },
         livingCondition: { 
             type: DataTypes.INTEGER,
             allowNull: true,
+            defaultValue: -1
         },
         isMarried: { 
             type: DataTypes.INTEGER,
             allowNull: true,
+            defaultValue: -1
         },
         hasMate: { 
             type: DataTypes.INTEGER,
             allowNull: true,
+            defaultValue: -1
         },
         family: { // String
             type: DataTypes.TEXT,
             allowNull: true,
+            
         },
         request: {
             type: DataTypes.TEXT,
