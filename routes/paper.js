@@ -67,8 +67,11 @@ router.put('/', isLoggedIn, async(req, res, next)=>{
     } = req.body;
     
     let isCompleted = true;
-    const str_problem = JSON.stringify(problem);
-    const str_symptom = JSON.stringify(symptom);
+
+    let str_problem = null;
+    let str_symptom = null;
+    if(problem) str_problem = JSON.stringify(problem.values);
+    if(symptom) str_symptom = JSON.stringify(symptom.values);
 
     if(gender!==-1 || !birth_year || job!==-1 || counselBefore!==-1 || clinicBefore!==-1 || 
         religion!==-1 || education!==-1 || livingCondition!==-1 || isMarried!==-1 || 

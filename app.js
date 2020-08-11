@@ -6,10 +6,23 @@ const morgan = require('morgan');
 const path = require('path');
 const session = require('express-session');
 require('dotenv').config();
+const http = require('http');
+
+// passport
 const passport = require('passport');
 const passportConfig = require('./passport');
 passportConfig(passport);
 
+// socket.io 추가
+const socketio = require('socket.io');
+const server = http.createServer(app);
+const io = socketio(server);
+const {
+    userJoin,
+    getCurrentUser,
+    userLeave,
+    getRoomUsers
+  } = require('./routes/middlewares');
 
 // 세션 활성화 + 설정
 app.use(morgan('dev'));
@@ -43,6 +56,7 @@ const counselorRouter = require('./routes/counselors');
 const myPageRouter = require('./routes/mypage');
 const caseRouter = require('./routes/cases');
 const paperRouter = require('./routes/paper');
+const chatRouter = require('./routes/chat');
 // bodyParser 사용설정
 
 // Routers
@@ -51,6 +65,7 @@ app.use('/counselors', counselorRouter);
 app.use('/mypage', myPageRouter);
 app.use('/cases', caseRouter);
 app.use('/paper', paperRouter);
+app.use('/chat', chatRouter);
 
 // http 에러 
 // 404
@@ -74,15 +89,80 @@ app.use((err, req, res, next)=>{
     return res.status(500).send(`Server ERROR`);
 });
 
+// socket 채팅
+const botName = 'Fine Bot';
+
+// 클라이언트 접속 시
+io.on('connection', socket => {
+    // 방 접속
+    socket.on('joinRoom', ({user_uid, username, room, type }) => {
+        user_uid, username, room, type
+      const user = userJoin(socket.id, user_uid, username, room, type);
+  
+      socket.join(user.room);
+  
+      // 방 접속 시 환영 메시지
+      socket.emit('notice', formatMessage(botName, '채팅 상담이 시작되었습니다. 상담을 위해 모든 대화는 안전하게 저장됩니다.'));
+  
+      // 방 접속 시 기존 유저에게 새 유저 접속 알림
+      socket.broadcast
+        .to(user.room)
+        .emit(
+          'notice',
+          formatMessage(botName, `${user.username} has joined the chat`)
+        );
+  
+      // Send users and room info
+      io.to(user.room).emit('roomUsers', {
+        room: user.room,
+        users: getRoomUsers(user.room)
+      });
+    });
+  
+    // 메세지 처리
+    socket.on('chatMessage', msg => {
+      const user = getCurrentUser(socket.id);
+  
+      io.to(user.room).emit('message',formatMessage(user.username, msg));
+      // db에 저장
+      try {
+        Message.create({
+          sender_uid: user.user_uid,
+          content: msg,
+          fk_case_id: user.room
+        });
+        
+      } catch (error) {
+        console.error(error);
+      }
+    });
+
+    // 입력 중
+    socket.on('on typing', function(typing){
+        console.log("Typing.... ");
+        io.emit('on typing', typing);
+    });
+  
+    // 클라이언트 접속 종료
+    socket.on('disconnect', () => {
+      const user = userLeave(socket.id);
+  
+      if (user) {
+        io.to(user.room).emit(
+          'message',
+          formatMessage(botName, `${user.username} has left the chat`)
+        );
+  
+        // Send users and room info
+        io.to(user.room).emit('roomUsers', {
+          room: user.room,
+          users: getRoomUsers(user.room)
+        });
+      }
+    });
+  });
 
 
+server.listen(app.get('port'), () => console.log(`Example app listening at http://localhost:${app.get('port')}`))
 
-
-
-
-
-
-
-app.listen(app.get('port'), () => console.log(`Example app listening at http://localhost:${app.get('port')}`))
-
-module.exports = app;
+module.exports = app, io;

@@ -13,7 +13,7 @@ module.exports = (sequelize, DataTypes)=>(
         gender: { // 상담사 성별
             type: DataTypes.INTEGER,
             allowNull: true,
-            defaultValue: 1 //1=여성, 2=남성, 3=기타
+            defaultValue: 0 //0=여성, 1=남성, 2=기타
         },
         description:{ // 간단 한줄 소개
             type: DataTypes.TEXT,

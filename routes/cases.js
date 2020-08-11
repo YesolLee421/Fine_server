@@ -138,7 +138,12 @@ router.post('/', isLoggedIn,  async(req, res, next)=>{
     console.log(`dateNow = ${date.toString()}`); 
 
     try {
+        const paper = await Paper.findOne({
+            attribute: ["id"],
+            where: {fk_user_uid: user_uid}
+        });
         const newCase = await Case.create({
+            paper_id: paper.id,
             counselor_id,
             totalCase: totalCase_int,
             totalPrice,
@@ -181,12 +186,12 @@ router.patch('/paper/:case_id', async(req, res, next)=>{
             where:{fk_user_uid: user_uid}, 
             attribute:[ 'id', 'isCompleted' ]
         });
-        if(!paper.isCompleted){
-            result.data = null;
-            result.message = "상담 접수지 문항을 전부 채워주십시오.";
-            result.success = false;
-            return res.status(200).json(result);
-        }
+        // if(!paper.isCompleted){
+        //     result.data = null;
+        //     result.message = "상담 접수지 문항을 전부 채워주십시오.";
+        //     result.success = false;
+        //     return res.status(200).json(result);
+        // }
         // 찾은 상담 접수지 번호 case에 저장
         await Case.update({
             paper_id: paper.id
