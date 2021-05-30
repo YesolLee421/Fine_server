@@ -94,22 +94,24 @@ const botName = 'Fine Bot';
 
 // 클라이언트 접속 시
 io.on('connection', socket => {
+    console.log("connect");
     // 방 접속
-    socket.on('joinRoom', ({user_uid, username, room, type }) => {
+    socket.on('joinRoom', ({user_uid, username, room }) => {
         user_uid, username, room, type
-      const user = userJoin(socket.id, user_uid, username, room, type);
+      const user = userJoin(socket.id, user_uid, username, room);
   
       socket.join(user.room);
+      console.log("join");
   
       // 방 접속 시 환영 메시지
-      socket.emit('notice', formatMessage(botName, '채팅 상담이 시작되었습니다. 상담을 위해 모든 대화는 안전하게 저장됩니다.'));
+      socket.emit('message', formatMessage("", botName, '채팅 상담이 시작되었습니다. 상담을 위해 모든 대화는 안전하게 저장됩니다.'));
   
       // 방 접속 시 기존 유저에게 새 유저 접속 알림
       socket.broadcast
         .to(user.room)
         .emit(
-          'notice',
-          formatMessage(botName, `${user.username} has joined the chat`)
+          'message',
+          formatMessage("", botName, `${user.username} 님이 입장하셨습니다.`)
         );
   
       // Send users and room info
@@ -123,7 +125,7 @@ io.on('connection', socket => {
     socket.on('chatMessage', msg => {
       const user = getCurrentUser(socket.id);
   
-      io.to(user.room).emit('message',formatMessage(user.username, msg));
+      io.to(user.room).emit('message',formatMessage(user.user_uid, user.username, msg));
       // db에 저장
       try {
         Message.create({
@@ -137,10 +139,12 @@ io.on('connection', socket => {
       }
     });
 
+    // 사진메시지 추후 따로 만들기
+
     // 입력 중
-    socket.on('on typing', function(typing){
+    socket.on('typing', function(typing){
         console.log("Typing.... ");
-        io.emit('on typing', typing);
+        io.emit('typing', typing);
     });
   
     // 클라이언트 접속 종료
